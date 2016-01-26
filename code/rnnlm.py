@@ -13,7 +13,7 @@ np.random.seed(1337) # seed the random number generator to produce the same init
 
 from keras.models import Sequential, model_from_json
 from keras.layers.core import Dense, Activation
-from keras.layers.recurrent import SimpleRNN
+from keras.layers.recurrent import SimpleRNN, LSTM, GRU
 from keras.layers.embeddings import Embedding
 from keras.optimizers import Adam
 
@@ -139,13 +139,30 @@ output_fn: string specifying the output function for the output layer
 outputs:
 model: the keras model object with the neural network structure
 '''
-def build(input_dim, embedding_layer_dim, n_hidden, activation_fn, output_fn): #Build the neural network
+def build(input_dim, embedding_layer_dim, n_hidden, activation_fn, output_fn, modelType): #Build the neural network
     #BEGIN
-    model = Sequential()
-    model.add(Embedding(output_dim=embedding_layer_dim, input_dim=input_dim))
-    model.add(SimpleRNN(n_hidden, init='uniform', inner_init='orthogonal', activation=activation_fn))
-    model.add(Dense(input_dim))
-    model.add(Activation(output_fn))
+    if modelType == "SimpleRNN":
+        print("Using SimpleRNN model.")
+        model = Sequential()
+        model.add(Embedding(output_dim=embedding_layer_dim, input_dim=input_dim))
+        model.add(SimpleRNN(n_hidden, init='uniform', inner_init='orthogonal', activation=activation_fn))
+        model.add(Dense(input_dim))
+        model.add(Activation(output_fn))
+    elif modelType == "LSTM":
+        print("Using LSTM model.")
+        model = Sequential()
+        model.add(Embedding(output_dim=embedding_layer_dim, input_dim=input_dim))
+        model.add(LSTM(n_hidden, init='uniform', activation=activation_fn))
+        model.add(Dense(input_dim))
+        model.add(Activation(output_fn))
+    elif modelType == "GRU":
+        # not yet supported
+        print("Using GRU model.")
+        model = Sequential()
+        model.add(Embedding(output_dim=embedding_layer_dim, input_dim=input_dim))
+        model.add(GRU(n_hidden, init='uniform', inner_init='orthogonal', activation=activation_fn, inner_activation=activation_fn))
+        model.add(Dense(input_dim))
+        model.add(Activation(output_fn))
     #END    
     return model
 
@@ -200,6 +217,7 @@ if __name__ == '__main__':
     parser.add_argument('-bs', type=int, help="specify the batch size for training (default: 500)")
     parser.add_argument('-ch', type=int, help="specify the chunk size for training (default: 10000)")
     parser.add_argument('-unk', type=int, help="specify your own unk symbol to handle oovs, make sure it is already in the vocab file (default: <unk>)")
+    parser.add_argument('-modeltype', help="Type of model to use (SimpleRNN, LSTM, or GRU)")
     args = parser.parse_args()
         
     t0 = time.time()
@@ -268,11 +286,15 @@ if __name__ == '__main__':
     if args.ch:
         chunk = args.ch
         
+    mtype = "SimpleRNN"
+    if args.modeltype:
+        mtype = args.modeltype
+        
     if args.train: #train the model on data and save the model
         E=np.eye(voc_size)
         print(sys.stderr, "Using one-hot encodings")
         print(sys.stderr, "Building the model")
-        model=build(input_dim=voc_size,embedding_layer_dim=n_embed,n_hidden=n_hidden,activation_fn=act,output_fn=oact)
+        model=build(input_dim=voc_size,embedding_layer_dim=n_embed,n_hidden=n_hidden,activation_fn=act,output_fn=oact, modelType=mtype)
         print(sys.stderr, "Fitting the model")
         fit(train_data=x,encodings=E,model=model,lr=lr,epsilon=epsilon,nb_epochs=nb_epochs,batch_size=batch_size,chunk=chunk)
         print(sys.stderr, "Saving the model")
