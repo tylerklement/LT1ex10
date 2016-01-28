@@ -1,0 +1,35 @@
+BatchSize: 2000
+Model: SimpleRNN
+TrainingTime: 1225.809197
+----------------------
+BatchSize: 1000
+Model: SimpleRNN
+TrainingTime: 1300.166330
+----------------------
+BatchSize: 500
+Model: SimpleRNN
+TrainingTime: 1674.716953
+----------------------
+BatchSize: 2000
+Model: GRU
+TrainingTime: 1971.444271
+----------------------
+BatchSize: 1000
+Model: GRU
+TrainingTime: 2045.837639
+----------------------
+BatchSize: 500
+Model: GRU
+TrainingTime: 2418.526365
+----------------------
+BatchSize: 2000
+Model: LSTM
+TrainingTime: 2558.288214
+----------------------
+BatchSize: 1000
+Model: LSTM
+TrainingTime: 2743.884932
+----------------------
+BatchSize: 500
+Model: LSTM
+TrainingTime: 3160.243007
